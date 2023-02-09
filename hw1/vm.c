@@ -1,4 +1,5 @@
-#include "vm.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 #define MAX_STACK_HEIGHT 2048
 #define MAX_CODE_LENGTH 512
@@ -14,7 +15,7 @@ typedef struct {
 void print_instructions(int PC, int instruction_end_index, instruction * InstructionMemory, char OPCODE_NAMES[NUM_OPCODES][OPCODE_LENGTH]);
 void initial_state(int PC, int instruction_end_index, instruction * InstructionMemory, char OPCODE_NAMES[NUM_OPCODES][OPCODE_LENGTH]);
 int print_trace(instruction Instruction, int PC, int BP, int SP, char OPCODE_NAMES[NUM_OPCODES][OPCODE_LENGTH], int * stack, int NDB);
-void print_stack_state(int SP, int * stack);
+void print_stack_state(int SP, int BP, int * stack);
 void final_print(int PC, int BP, int SP,int * stack);
 void machine(FILE *fp);
 
@@ -80,7 +81,7 @@ void machine(FILE *fp) {
          // Invariant check
             if (!(0 <= BP) && !(BP <= SP) && !(0 <= SP) && !(SP < MAX_STACK_HEIGHT))
             {   
-                fprintf(stderr, "Invariants violated!\n");
+                printf("Invariants violated!\n");
                 exit(1);
             }
             
@@ -88,18 +89,15 @@ void machine(FILE *fp) {
             {   
                  if((SP - 1) < 0)
                 {
-                    fprintf(stderr, "Trying to pop an empty stack!\n");
+                    printf("Trying to pop an empty stack!\n");
                     exit(1);
                 }
                 
-                fprintf(stderr, "Invariants violated!" );
+                printf("Invariants violated!" );
                 exit(1);
             }
         
-        
         switch (InstructionMemory[PC].op) {
-            
-            // Tracing the stack
 
             // LIT
             case 1:
@@ -121,6 +119,7 @@ void machine(FILE *fp) {
                 BP = SP;
                 SP += 2;
                 PC = InstructionMemory[PC].m;
+                PC--;
                 break;
             
             // POP
@@ -170,7 +169,6 @@ void machine(FILE *fp) {
                 }
                     
                 SP--;
-                
                 break;
                 
             // CHO 
@@ -180,8 +178,7 @@ void machine(FILE *fp) {
                 break;
                 
             // CHI
-            case 12: ;
-                char c;
+            case 12:
                 stack[SP] = getc(stdin); 
                 SP--;
                 break;
@@ -288,8 +285,15 @@ void machine(FILE *fp) {
                 break;
             
             default:
+                exit(1);
                 break;
         }
+
+        if(SP < 0){
+                printf("Trying to pop an empty stack!\n");
+                exit(1);
+            }
+
         PC++;
         if (NDB == 0)
             print_trace(InstructionMemory[PC], PC, BP, SP, OPCODE_NAMES, stack, NDB);
@@ -307,9 +311,9 @@ void print_instructions(int PC, int instruction_end_index, instruction * Instruc
         
 }
 
-void print_stack_state(int SP, int * stack) {
+void print_stack_state(int SP, int BP, int * stack) {
     printf("stack: ");
-    for (int i = 0; i < SP; i++)
+    for (int i = BP; i < SP; i++)
         printf("S[%d]: %d ", i, stack[i]);
     printf("\n");
 }
@@ -317,7 +321,7 @@ void print_stack_state(int SP, int * stack) {
 int print_trace(instruction Instruction, int PC, int BP, int SP, char OPCODE_NAMES[NUM_OPCODES][OPCODE_LENGTH], int * stack, int NDB) {
     
     printf("PC: %d BP: %d SP: %d\n", PC, BP, SP);
-    print_stack_state(SP, stack);
+    print_stack_state(SP, BP, stack);
     printf("==> addr: %d \t%s   %d\n", PC, OPCODE_NAMES[Instruction.op - 1], Instruction.m);
     
     return 0;
@@ -325,7 +329,7 @@ int print_trace(instruction Instruction, int PC, int BP, int SP, char OPCODE_NAM
 
 void final_print(int PC, int BP, int SP,int * stack){
     printf("PC: %d BP: %d SP: %d\n", PC, BP, SP);
-    print_stack_state(SP, stack);
+    print_stack_state(SP, BP, stack);
     exit(0);
 }
 
