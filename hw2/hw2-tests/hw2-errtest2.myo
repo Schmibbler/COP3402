@@ -1,0 +1,4 @@
+Tokens from file hw2-errtest2.pl0
+Number Name       Line Column Text/Value
+22     numbersym  2    1      -32768
+33     eofsym     3    1     

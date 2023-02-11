@@ -1,0 +1,10 @@
+Tokens from file hw2-errtest1.pl0
+Number Name       Line Column Text/Value
+21     identsym   2    1      "let"
+21     identsym   2    4      "'"
+21     identsym   2    5      "s"
+21     identsym   2    7      "try"
+21     identsym   2    11     "some"
+21     identsym   2    16     "errors"
+21     identsym   2    22     "!"
+33     eofsym     3    1     
